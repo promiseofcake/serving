@@ -1,6 +1,6 @@
-FROM ubuntu:14.04
+FROM nvidia/cuda:7.5-cudnn5-devel
 
-MAINTAINER Jeremiah Harmsen <jeremiah@google.com>
+MAINTAINER Lucas Kacher <lucas@vsco.co>
 
 RUN apt-get update && apt-get install -y \
         build-essential \
@@ -57,9 +57,10 @@ RUN echo "startup --batch" >>/root/.bazelrc
 RUN echo "build --spawn_strategy=standalone --genrule_strategy=standalone" \
     >>/root/.bazelrc
 ENV BAZELRC /root/.bazelrc
+
 # Install the most recent bazel release.
 ENV BAZEL_VERSION 0.3.1
-WORKDIR /
+
 RUN mkdir /bazel && \
     cd /bazel && \
     curl -fSsL -O https://github.com/bazelbuild/bazel/releases/download/$BAZEL_VERSION/bazel-$BAZEL_VERSION-installer-linux-x86_64.sh && \
@@ -68,5 +69,12 @@ RUN mkdir /bazel && \
     ./bazel-$BAZEL_VERSION-installer-linux-x86_64.sh && \
     cd / && \
     rm -f /bazel/bazel-$BAZEL_VERSION-installer-linux-x86_64.sh
+
+ENV CUDA_TOOLKIT_PATH /usr/local/cuda
+ENV CUDNN_INSTALL_PATH /usr/local/cuda
+ENV TF_NEED_CUDA 1
+ENV CUDA_PATH /usr/local/cuda
+
+WORKDIR /root
 
 CMD ["/bin/bash"]
